@@ -15,53 +15,138 @@ resource "aws_dynamodb_table" "tasks_dynamodb_table" {
   }
 }
 
-/* commenting out
-resource "aws_iam_role" "iam_for_lambda" {
-  name = "iam_for_lambda"
-
-  assume_role_policy = <<EOF
+resource "aws_iam_role" "LambdaDeleteTasksDB" {
+    name               = "LambdaDeleteTasksDB"
+    path               = "/service-role/"
+    assume_role_policy = <<POLICY
 {
   "Version": "2012-10-17",
   "Statement": [
-      {
-        "Action": "sts:AssumeRole",
-        "Principal": {
-          "Service": "lambda.amazonaws.com"
-        },
-        "Effect": "Allow",
-        "Sid": ""
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
       },
-      {
-          "Effect": "Allow",
-          "Action": "logs:CreateLogGroup",
-          "Resource": "arn:aws:logs:us-east-1:790579188910:*"
-      },
-      {
-          "Effect": "Allow",
-          "Action": [
-              "logs:CreateLogStream",
-              "logs:PutLogEvents"
-          ],
-          "Resource": [
-              "arn:aws:logs:us-east-1:790579188910:log-group:/aws/lambda/ListTasks:*"
-          ]
-      },
-      {
-          "Sid": "",
-          "Effect": "Allow",
-          "Action": [
-              "dynamodb:BatchGetItem",
-              "dynamodb:GetItem",
-              "dynamodb:GetRecords",
-              "dynamodb:Query",
-              "dynamodb:Scan"
-          ],
-          "Resource": [
-              "arn:aws:dynamodb:us-east-1:790579188910:table/Tasks"
-          ]
-      }
+      "Action": "sts:AssumeRole"
+    }
   ]
 }
-EOF
+POLICY
 }
+
+resource "aws_iam_role" "LambdaEmailer" {
+    name               = "LambdaEmailer"
+    path               = "/service-role/"
+    assume_role_policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_iam_role" "LambdaReadTasksDB" {
+    name               = "LambdaReadTasksDB"
+    path               = "/service-role/"
+    assume_role_policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_iam_role" "LambdaWriteTasksDB" {
+    name               = "LambdaWriteTasksDB"
+    path               = "/service-role/"
+    assume_role_policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_iam_policy" "AWSLambdaBasicExecutionRole-AddTasks" {
+    name        = "AWSLambdaBasicExecutionRole-AddTasks"
+    path        = "/service-role/"
+    description = ""
+    policy      = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "logs:CreateLogGroup",
+      "Resource": "arn:aws:logs:*:*:*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:logs:*:*:log-group:/aws/lambda/AddTasks:*"
+      ]
+    }
+  ]
+}
+POLICY
+}
+
+resource "aws_iam_role_policy" "LambdaWriteTasksDB_LambdaWriteTasksDB-201707102006" {
+    name   = "LambdaWriteTasksDB-201707102006"
+    role   = "LambdaWriteTasksDB"
+    policy = <<POLICY
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+      ],
+      "Resource": [
+        "${aws_dynamodb_table.tasks_dynamodb_table.arn}"
+      ]
+    }
+  ]
+}
+POLICY
+}
+
+/* commenting out
 */
