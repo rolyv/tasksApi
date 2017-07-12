@@ -5,7 +5,7 @@ clean-zip:
 	rm -f lambda_funcs.zip
 
 clean-deploy:
-	terraform destory -force
+	terraform destroy -force
 
 clean-all:
 	clean-zip
