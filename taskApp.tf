@@ -72,8 +72,8 @@ resource "aws_iam_role" "LambdaReadTasksDB" {
 POLICY
 }
 
-resource "aws_iam_role" "LambdaWriteTasksDB" {
-    name               = "LambdaWriteTasksDB"
+resource "aws_iam_role" "LambdaCreateTasksRole" {
+    name               = "LambdaCreateTasks"
     path               = "/service-role/"
     assume_role_policy = <<POLICY
 {
@@ -91,37 +91,9 @@ resource "aws_iam_role" "LambdaWriteTasksDB" {
 POLICY
 }
 
-resource "aws_iam_policy" "AWSLambdaBasicExecutionRole-AddTasks" {
-    name        = "AWSLambdaBasicExecutionRole-AddTasks"
-    path        = "/service-role/"
-    description = ""
-    policy      = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "logs:CreateLogGroup",
-      "Resource": "arn:aws:logs:*:*:*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ],
-      "Resource": [
-        "arn:aws:logs:*:*:log-group:/aws/lambda/AddTasks:*"
-      ]
-    }
-  ]
-}
-POLICY
-}
-
-resource "aws_iam_role_policy" "LambdaWriteTasksDB_LambdaWriteTasksDB-201707102006" {
-    name   = "LambdaWriteTasksDB-201707102006"
-    role   = "LambdaWriteTasksDB"
+resource "aws_iam_role_policy" "LambdaCreateTasks_Policy-201707102006" {
+    name   = "LambdaCreateTasks_Policy-201707102006"
+    role   = "LambdaCreateTasks"
     policy = <<POLICY
 {
   "Version": "2012-10-17",
@@ -148,5 +120,17 @@ resource "aws_iam_role_policy" "LambdaWriteTasksDB_LambdaWriteTasksDB-2017071020
 POLICY
 }
 
-/* commenting out
-*/
+resource "aws_iam_policy_attachment" "Lambda_ExecutionPolicy" {
+  name       = "Lambda_ExecutionPolicy"
+  roles      = ["${aws_iam_role.LambdaCreateTasksRole.name}"]
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_lambda_function" "CreateTasks" {
+  filename      = "lambda_funcs.zip"
+  function_name = "CreateTasks"
+  description   = "Lambda function to handle http requests for creating new tasks"
+  role          = "${aws_iam_role.LambdaCreateTasksRole.arn}"
+  handler       = "create.handler"
+  runtime       = "python3.6"
+}

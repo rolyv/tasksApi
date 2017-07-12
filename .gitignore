@@ -1,4 +1,6 @@
-# ignore Terraform state
+##
+## ignore Terraform state
+##
 
 # Compiled files
 *.tfstate
@@ -6,3 +8,10 @@
 
 # Module directory
 .terraform/
+
+
+##
+## ignore zip files (particularly lambda functions zip file)
+##
+
+**/**/*.zip
