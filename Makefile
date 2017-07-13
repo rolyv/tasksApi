@@ -7,9 +7,7 @@ clean-zip:
 clean-deploy:
 	terraform destroy -force
 
-clean-all:
-	clean-zip
-	clean-deploy
+clean: clean-zip clean-deploy
 
 deploy: zip-lambdas
 	terraform apply

@@ -1,11 +1,9 @@
 
 import boto3
 import json
-import uuid
 
 print('Loading function')
-dynamo = boto3.resource('dynamodb')
-table = dynamo.Table('Tasks')
+dynamo = boto3.client('dynamodb')
 
 def respond(err, res=None):
     return {
@@ -18,9 +16,5 @@ def respond(err, res=None):
 
 def handler(event, context):
     #print("Received event: " + json.dumps(event, indent=2))
-    payload = event.copy()
-    payload["id"] = str(uuid.uuid4())
 
-    response = table.put_item(Item=payload)
-
-    return respond(None, payload)
+    return respond(None, dynamo.scan(TableName="Tasks"))
