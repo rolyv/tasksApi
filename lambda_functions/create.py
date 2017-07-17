@@ -1,26 +1,23 @@
-
 import boto3
 import json
 import uuid
+from lambda_functions import decimalencoder
 
 print('Loading function')
-dynamo = boto3.resource('dynamodb')
+dynamo = boto3.resource('dynamodb', region_name='us-east-1')
 table = dynamo.Table('Tasks')
 
-def respond(err, res=None):
-    return {
-        'statusCode': '400' if err else '200',
-        'body': err.message if err else json.dumps(res),
-        'headers': {
-            'Content-Type': 'application/json',
-        },
-    }
 
 def handler(event, context):
-    #print("Received event: " + json.dumps(event, indent=2))
+    # print("Received event: " + json.dumps(event, indent=2))
     payload = event.copy()
     payload["id"] = str(uuid.uuid4())
 
-    response = table.put_item(Item=payload)
+    table.put_item(Item=payload)
 
-    return respond(None, payload)
+    response = {
+        "statusCode": 201,
+        "body": json.dumps(payload, cls=decimalencoder.DecimalEncoder)
+    }
+
+    return response

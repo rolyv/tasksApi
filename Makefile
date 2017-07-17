@@ -10,4 +10,4 @@ clean-deploy:
 clean: clean-zip clean-deploy
 
 deploy: zip-lambdas
-	terraform apply
+	terraform apply ./terraform

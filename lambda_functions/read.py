@@ -1,20 +1,22 @@
 
 import boto3
 import json
+from lambda_functions import decimalencoder
 
 print('Loading function')
-dynamo = boto3.client('dynamodb')
-
-def respond(err, res=None):
-    return {
-        'statusCode': '400' if err else '200',
-        'body': err.message if err else json.dumps(res),
-        'headers': {
-            'Content-Type': 'application/json',
-        },
-    }
+dynamo = boto3.resource('dynamodb')
 
 def handler(event, context):
     #print("Received event: " + json.dumps(event, indent=2))
+    table = dynamo.Table("Tasks")
 
-    return respond(None, dynamo.scan(TableName="Tasks"))
+    # fetch all tasks from db
+    result = table.scan()
+
+    # create a response
+    response = {
+        "statusCode" : 200,
+        "body": json.dumps(results["Items"], cls=decimalencoder.DecimalEncoder)
+    }
+
+    return response
